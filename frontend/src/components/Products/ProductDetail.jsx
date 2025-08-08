@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import ProductGrid from "./ProductGrid";
 
 const selectedProduct = {
     name: "Stylish Jacket",
-    price: 120,
-    originalPrice: "This is a stylish jacket perfect for any occasion",
+    price: 180,
+    originalPrice: 170,
+    description: "This is a stylish jacket perfect for any occasion",
     brand: "FashionBrand",
     material: "Leather",
     sizes: ["S", "M", "L", "XL"],
@@ -22,13 +25,83 @@ const selectedProduct = {
 }
 
 
+
+const similiarProducts = [
+    {
+        _id: 1,
+        name: "Classic White T-Shirt",
+        price: 29.99,
+        image: [{ url: "https://picsum.photos/200/300?random=1" }]
+    },
+    {
+        _id: 2,
+        name: "Denim Jacket",
+        price: 79.99,
+        image: [{ url: "https://picsum.photos/200/300?random=2"}]
+    },
+    {
+        _id: 3,
+        name: "Casual Hoodie",
+        price: 49.99,
+        image: [{ url: "https://picsum.photos/200/300?random=3"}]
+    },
+    {
+        _id: 4,
+        name: "Black Leather Jacket",
+        price: 119.99,
+        image: [{ url: "https://picsum.photos/200/300?random=4" }]
+    },
+    
+];
+
+
+
+
+
+
 const ProductDetail = () => {
     const [mainImg, setImg] = useState("");
+    const [selectedSize, setSelectedSize] = useState("");
+    const [selectedColor, setSelectedColor] = useState("");
+    const [quantity, setQuantity] = useState(1);
+    const [isButtonDisable, setIsbuttonDisable] = useState(false);
+
+
+
     useEffect(() => {
         if (selectedProduct?.images?.length > 0) {
             setImg(selectedProduct.images[0].url)
         }
     }, [selectedProduct]);
+
+    const handleQuantity = (action) => {
+        if (action === "minus")
+            setQuantity((prev) => Math.max(1, prev - 1));
+        else
+            setQuantity((prev) => prev + 1);
+
+
+    }
+    function handleCart() {
+        if (!selectedColor || !selectedSize) {
+            toast.error("Please select a size and color before adding to cart.", {
+                duration: 1000,
+            });
+            return;
+        }
+        setIsbuttonDisable(true);
+
+        setTimeout(() => {
+            toast.success("product added to cart!.", {
+                duration: 1000,
+            });
+            setIsbuttonDisable(false);
+        }, 500)
+    }
+
+
+
+
     return (
         <div className="p-6">
             <div className="max-w-6xl mx-auto bg-white p-8 rounded-lg">
@@ -65,7 +138,9 @@ const ProductDetail = () => {
                             <img key={index}
                                 src={image.url}
                                 alt={image.altText || `Thumbnail ${index}`}
-                                className="w-20 h-20 object-cover rounded-lg cursor-pointer border" />
+                                className={`w-20 h-20 object-cover rounded-lg cursor-pointer border 
+                                    ${mainImg === image.url ? "border-black" : "border-gray-300"}`}
+                                onClick={() => setImg(image.url)} />
 
                         ))}
 
@@ -80,11 +155,11 @@ const ProductDetail = () => {
 
                         </h1>
                         <p className="text-lg text-gray-600 mb-1 line-through">
-                            {selectedProduct.originalPrice && `${selectedProduct.price}`}
-
+                            ${selectedProduct.originalPrice}
                         </p>
+
                         <p className="text-lg text-gray-500 mb-2">
-                            $ {selectedProduct.price}
+                            ${selectedProduct.price}
                         </p>
                         <p className="text-gray-600 mb-4 ">{selectedProduct.description}</p>
 
@@ -92,11 +167,15 @@ const ProductDetail = () => {
                             <p className="text-gray-700"> Color : </p>
                             <div className="flex gap-2 mt-2">
                                 {selectedProduct.colors.map((color) => (
-                                    <button key={color} className="w-8 h-8 rounded-full border"
+                                    <button key={color}
                                         style={{
                                             backgroundColor: color.toLocaleLowerCase(),
                                             filter: "brightness(0.5)",
-                                        }}>
+                                        }}
+                                        onClick={() => setSelectedColor(color)}
+                                        className={`w-8 h-8 rounded-full border 
+                                            ${selectedColor === color ? "border-4 border-black " : "border-gray-300"}`}
+                                    >
 
                                     </button>
                                 ))}
@@ -108,7 +187,10 @@ const ProductDetail = () => {
                             <p className="text-gray-700"> Size : </p>
                             <div className="flex gap-2 mt-2">
                                 {selectedProduct.sizes.map((size) => (
-                                    <button key={size} className="px-4 py-2 rounded border">
+                                    <button
+                                        key={size}
+                                        onClick={() => setSelectedSize(size)}
+                                        className={`px-4 py-2 rounded border ${selectedSize === size ? "bg-black text-white" : ""}`}>
                                         {size}
                                     </button>
                                 ))}
@@ -116,19 +198,61 @@ const ProductDetail = () => {
                         </div>
 
                         <div className="mb-6">
-                            <p className="text-gray-700">Quantity : </p>
+                            <p className="text-gray-700" > Quantity: </p>
                             <div className="flex items-center space-x-4 mt-2">
-                                <button className="px-2 py-1 bg-gray-200 rounded text-lg"> - </button>
-                                <span className="text-lg">1</span>
-                                <button className="px-2 py-1 bg-gray-200 rounded text-lg"> + </button>
+                                <button className="px-2 py-1 bg-gray-200 rounded text-lg"
+                                    onClick={() => handleQuantity("minus")}     > - </button>
+                                <span className="text-lg">{quantity}</span>
+                                <button className="px-2 py-1 bg-gray-200 rounded
+                                 text-lg"
+                                    onClick={() => handleQuantity("plus")}
+                                > + </button>
                             </div>
 
                         </div>
-                        <button className="bg-black text-white py-2 px-6 rounded w-full mb-4">ADD TO CART</button>
+                        <button
+                            onClick={handleCart} disabled={isButtonDisable}
+                            className={`bg-black text-white py-2 px-6 rounded w-full mb-4 ${isButtonDisable ? "cursor-not-allowed opacity-50  " : " hover:bg-gray-900 "}`}
+                        >{
+                                isButtonDisable ? "Adding..." : "ADD TO CART"
+                            }</button>
+                        <div className="mt-10 text-gray-700">
+                            <h3 className="text-xl font-bold mb-4">Charactertics: </h3>
+                            <table className="w-full text-left text-sm text-gray-600">
+                                <tbody>
+                                    <tr>
+                                        <td className="py-1">
+                                            Brand
+                                        </td>
+                                        <td className="py-1">
+                                            {selectedProduct.brand}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td className="py-1">
+                                            Material
+                                        </td>
+                                        <td className="py-1">
+                                            {selectedProduct.material}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
+                        </div>
                     </div>
 
                 </div>
+
+
+                <div className="mt-20">
+                    <h2 className="text-2xl text-center font-medium mb-4">
+                        You May Also Like
+                    </h2>
+                    <ProductGrid Products={similiarProducts} />
+                </div>
+
+
 
             </div>
 
