@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import LoginPage from './pages/LoginPage';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Collections from './pages/Collections';
 
 function App() {
 return (
@@ -16,6 +17,7 @@ return (
             <Route path = "login" element = { <LoginPage/> }/>
              <Route path = "register" element = { <Register/> }/>
               <Route path = "profile" element = { <Profile/> }/>
+                <Route path = "collection/:collection" element = { <Collections/> }/>
 
          </Route>
       </Routes>
